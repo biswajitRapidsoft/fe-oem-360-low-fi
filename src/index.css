@@ -11,3 +11,29 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+
+
+.MuiTableContainer-root {
+  box-shadow: none;
+}
+
+.MuiTable-root{
+  border-collapse: separate;
+  border-spacing: 0 20px;
+  }
+
+.MuiTable-root th, .MuiTable-root td  {
+  border-top: 5px solid rgba(214, 242, 251, 0.30);
+  border-bottom: 5px solid rgba(214, 242, 251, 0.30); 
+  /* border: 1px solid black; */
+
+}
+
+/* .MuiTable-root table{
+  border-radius: 20px;
+  } */
+
+/* .MuiTable-root tr{ */
+  /* border-radius: 40px; */
+/* } */

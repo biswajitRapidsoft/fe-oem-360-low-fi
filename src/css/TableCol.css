@@ -1,0 +1,56 @@
+.gutterDiv {
+    color: #281C61;
+
+    font-family: Inter;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    text-decoration-line: underline;
+    text-transform: uppercase;
+}
+
+.typo {
+    color: #281C61;
+    font-family: Open Sans;
+    font-size: 1.25rem;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    text-transform: capitalize;
+}
+
+.search-container {
+    position: relative;
+    width: 13.75rem;
+    height: 2.5rem;
+    flex-shrink: 0;
+
+    border-radius: 0.75rem;
+/* border: 0.7px solid #281C61; */
+background: rgba(255, 255, 255, 0.10);
+
+   
+}
+
+.searchfilter {
+    padding: 8px 30px 8px 8px;
+    /* border: 1px solid #ccc; */
+    border-radius: 4px;
+    outline: none;
+    width: 200px;
+}
+
+.search-icon {
+    position: absolute;
+    right: 14px;
+    top: 55%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #666;
+}
+
+.second_div{
+    display: flex;
+    flex-direction: row;
+}
