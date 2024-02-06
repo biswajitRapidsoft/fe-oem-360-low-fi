@@ -3,9 +3,7 @@ const config = Object.freeze({
   // baseUrl: "http://192.168.12.47:9092/", // Somya
   baseUrl: "http://localhost:9092/", // Somya
   // baseUrl: "http://192.168.29.170:9092/", //Somya HOME IP
-  // baseUrl: "https://vmsstaging.nyggs.com/backend/",
   apiName: {
-    // loginFormNKSubmit: "token",
     login: "user/v1/signIn",
     pageData: "recommendation/page/data",
     addRecommendation: "recommendation/create",
