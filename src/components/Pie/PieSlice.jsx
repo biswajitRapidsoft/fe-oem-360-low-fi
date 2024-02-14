@@ -6,6 +6,8 @@ import {
   RECOMMENDATION_TYPE,
 } from "../../helper/constant";
 
+//ok
+
 const PieSlice = (props) => {
   const { data, pieChartType } = props;
   const chartRef = useRef(null);
