@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useState,useEffect} from 'react';
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
 import Collapse from "@mui/material/Collapse";
@@ -18,7 +18,9 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import Button from "@mui/material/Button";
 import RejectModal from "./RejectModal";
-
+import AcceptModal from "./AcceptModal";
+import AcceptModalAppOwner from "./AcceptModalAppOwner";
+import ViewTrail from "./ViewTrail";
 
 // <Button variant="contained">Contained</Button>
 // <Button variant="outlined">Outlined</Button>
@@ -57,13 +59,31 @@ function createData(
 }
 
 function Row(props) {
-  const { row, onRowClick } = props;
+  const {
+    row,
+    onRowClick,
+    openRows,
+    listData,
+    fetchApprovedListAppOwner,
+    fetchDataAppOwner,
+    fetchDataAgm,
+    fetchDataPiechart,
+  } = props;
   const [open, setOpen] = React.useState(false);
 
-
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [selectedData, setSelectedData] = useState(null);
 
-  const handleRejectClick = () => {
+  const [rejectModalAppOwnerOpen, setRejectModalAppOwnerOpen] = useState(false);
+  const [selectedDataAppOwner, setSelectedDataAppOwner] = useState(null);
+
+  //token
+  const datas = sessionStorage.getItem("data");
+  const data = JSON.parse(datas);
+  const token = data.token;
+  const userType = data.userType;
+
+  const handleRejectClick = (listItem) => {
     setRejectModalOpen(true);
   };
 
@@ -71,11 +91,130 @@ function Row(props) {
     setRejectModalOpen(false);
   };
 
-  function createData(name, calories, fat, carbs, protein) {
-    return { name, calories, fat, carbs, protein };
-  }
+  const handleRejectAppOwnerClick = (listItem) => {
+    setRejectModalOpen(true);
+  };
 
-  const rows = [createData("Frozen yoghurt", 159, 6.0, 24, 4.0)];
+  const handleRejectModalAppOwnerClose = () => {
+    setRejectModalOpen(false);
+  };
+
+  //accept
+  const [acceptModalOpen, setAcceptModalOpen] = useState(false);
+
+  const [acceptAppOwnerModal, setAcceptAppOwnerModal] = useState(false);
+
+  // const [trailData, setTrailData] = useState([]);
+
+  const handleAcceptClick = () => {
+    const tableData = listData.find(
+      (item) => item.referenceId === row.ReferenceId
+    );
+
+    if (
+      userType === "APPLICATION_OWNER" &&
+      (row.Status === "AGM/DGM reverted" || row.Status === "AGM/DGM rejected")
+    ) {
+      setAcceptModalOpen(true);
+      handleAcceptModalOpen({ row, tableData });
+    } else if (userType === "AGM") {
+      setAcceptModalOpen(true);
+      handleAcceptModalOpen({ row, tableData });
+    } else if (
+      userType === "APPLICATION_OWNER" &&
+      tableData.trailResponse !== null
+    ) {
+      setAcceptModalOpen(true);
+      handleAcceptModalOpen({ row, tableData });
+    } else if (userType === "OEM_SI" || userType === "GM_IT_INFRA") {
+      setAcceptModalOpen(true);
+      handleAcceptModalOpen({ row, tableData });
+    } else if (
+      userType === "APPLICATION_OWNER" &&
+      (row.Status === "Recommendation created" ||
+        row.Status === "Review process")
+    ) {
+      setAcceptAppOwnerModal(true);
+      const tableData = listData.find(
+        (item) => item.referenceId === row.ReferenceId
+      );
+
+      handleAcceptAppOwnerModalOpen({ row, tableData });
+    }
+  };
+
+  const handleAcceptModalOpen = (data) => {
+    setSelectedData(data);
+  };
+
+  // console.log(selectedData,"handleacceptmodaldataa")
+
+  const handleAcceptModalClose = () => {
+    setAcceptModalOpen(false);
+  };
+
+  const handleAcceptAppOwnerModalOpen = (data) => {
+    setSelectedDataAppOwner(data);
+  };
+
+  const handleAcceptAppOwnerModalClose = () => {
+    setAcceptAppOwnerModal(false);
+  };
+
+  const handleRevertClick = () => {
+    setAcceptModalOpen(true);
+    const tableData = listData.find(
+      (item) => item.referenceId === row.ReferenceId
+    );
+    // Pass both row and tableData to the AcceptModal component
+    handleAcceptModalOpen({ row, tableData });
+  };
+
+  // let viewTrailData;
+  //   const fetchViewTrailData = () => {
+
+  const viewTrailData = listData.find(
+    (item) => item.referenceId === row.ReferenceId
+  );
+  //   setTrailData(viewTrailData);
+  // };
+
+  // useEffect(() => {
+  //   fetchViewTrailData();
+  // }, [row]);
+
+  const getStatusColor = (status) => {
+    if (status === "Recommendation rejected") {
+      return "red";
+    } else if (status === "Recommendation accepted") {
+      return "#8BB610";
+    } else {
+      return "orange";
+    }
+  };
+
+  // Function to format date strings
+  const formatDate = (dateString) => {
+    if (!dateString) {
+      return ""; // Handle cases where dateString is not provided
+    }
+
+    const date = new Date(dateString);
+    const options = {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      // hour: "2-digit",
+      // minute: "2-digit",
+      // hour12: true,
+    };
+
+    const formattedDate = new Intl.DateTimeFormat("en-IN", options).format(
+      date
+    );
+
+    return formattedDate;
+  };
 
   return (
     <React.Fragment>
@@ -89,153 +228,419 @@ function Row(props) {
         <TableCell align="left">{row.Department}</TableCell>
         <TableCell align="left">{row.ComponentName}</TableCell>
         <TableCell align="left">{row.ApplicationOwner}</TableCell>
-        <TableCell align="left">{row.Status}</TableCell>
+        <TableCell align="left" sx={{ color: getStatusColor(row.Status) }}>
+          {row.Status}
+        </TableCell>
         <TableCell>
           <IconButton
             aria-label="expand row"
             size="small"
-            onClick={() => onRowClick(row.ReferenceId)}
+            // onClick={() => onRowClick(row.ReferenceId)}
+            onClick={() => setOpen(!open)}
           >
-            {row.open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
       </StyledTableRow>
 
       <TableRow>
         <TableCell colSpan={10} style={{ padding: 0 }}>
-          <Collapse in={row.open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 1 }}>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <Box sx={{ backgroundColor: "" }}>
               {/* Your second table content goes here */}
 
-              <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 650 }} aria-label="simple table">
+              <TableContainer sx={{ backgroundColor: "" }}>
+                <Table
+                  sx={{
+                    minWidth: 650,
+                    backgroundColor: "",
+                    borderCollapse: "collapse",
+                  }}
+                  // aria-label="simple table"
+                >
                   <TableHead>
                     <TableRow>
-                      <TableCell>Dessert (100g serving)</TableCell>
-                      <TableCell align="right">Calories</TableCell>
-                      <TableCell align="right">Fat&nbsp;(g)</TableCell>
-                      <TableCell align="right">Carbs&nbsp;(g)</TableCell>
-                      <TableCell align="right">Protein&nbsp;(g)</TableCell>
+                      <TableCell sx={{ borderBottom: 0 }}>
+                        Description
+                      </TableCell>
+                      <TableCell
+                        align="right"
+                        sx={{
+                          backgroundColor: "",
+                          // marginBottom: 5,
+                          // float: "left",
+                          // colspan: 2,
+                          borderBottom: 0,
+                        }}
+                      >
+                        Develpoment start date
+                      </TableCell>
+                      <TableCell align="right" sx={{ borderBottom: 0 }}>
+                        Development end date
+                      </TableCell>
+                      <TableCell align="right" sx={{ borderBottom: 0 }}>
+                        Test completion date
+                      </TableCell>
+                      <TableCell align="right" sx={{ borderBottom: 0 }}>
+                        Deployment date
+                      </TableCell>
+                      <TableCell align="right" sx={{ borderBottom: 0 }}>
+                        Impacted department
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {rows.map((row) => (
-                      <TableRow
-                        key={row.name}
-                        sx={{
-                          // "&:last-child td, &:last-child th": { border: 0 },
-                        }}
-                      >
-                        <TableCell component="th" scope="row">
-                          {row.name}
-                        </TableCell>
-                        <TableCell align="right">{row.calories}</TableCell>
-                        <TableCell align="right">{row.fat}</TableCell>
-                        <TableCell align="right">{row.carbs}</TableCell>
-                        <TableCell align="right">{row.protein}</TableCell>
+                    {listData
+                      .filter((item) => item.referenceId === row.ReferenceId)
+                      .map((listItem) => (
+                        <TableRow
+                          key={listItem.referenceId}
+                          style={{ width: "", borderBottom: "none" }}
+                        >
+                          <TableCell
+                            component="th"
+                            scope="row"
+                            style={{ width: "", borderBottom: "none" }}
+                          >
+                            {listItem.descriptions}
+                          </TableCell>
+                          <TableCell
+                            component="th"
+                            scope="row"
+                            align="right"
+                            style={{ width: "", borderBottom: "none" }}
+                          >
+                            {/* {
+                              listItem.recommendationDeploymentDetails
+                                ?.developmentStartDate
+                            } */}
 
-                     
-                      </TableRow>
-                    ))}
+                            {listItem.recommendationDeploymentDetails
+                              ?.developmentStartDate ? (
+                              formatDate(
+                                listItem.recommendationDeploymentDetails
+                                  .developmentStartDate
+                              )
+                            ) : (
+                              <span
+                                style={{
+                                  marginRight: 135,
+                                  backgroundColor: "",
+                                }}
+                              >
+                                --
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell
+                            component="th"
+                            scope="row"
+                            align="right"
+                            style={{ width: "", borderBottom: "none" }}
+                          >
+                            {listItem.recommendationDeploymentDetails
+                              ?.developementEndDate ? (
+                              formatDate(
+                                listItem.recommendationDeploymentDetails
+                                  .developementEndDate
+                              )
+                            ) : (
+                              <span
+                                style={{
+                                  marginRight: 130,
+                                  backgroundColor: "",
+                                }}
+                              >
+                                --
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell
+                            component="th"
+                            scope="row"
+                            align="right"
+                            style={{ width: "", borderBottom: "none" }}
+                          >
+                            {/* {formatDate(
+                              listItem.recommendationDeploymentDetails
+                                ?.testCompletionDate
+                            )} */}
+                            {listItem.recommendationDeploymentDetails
+                              ?.testCompletionDate ? (
+                              formatDate(
+                                listItem.recommendationDeploymentDetails
+                                  .testCompletionDate
+                              )
+                            ) : (
+                              <span
+                                style={{
+                                  marginRight: 115,
+                                  backgroundColor: "",
+                                }}
+                              >
+                                --
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell
+                            component="th"
+                            scope="row"
+                            align="right"
+                            style={{ width: "", borderBottom: "none" }}
+                          >
+                            {/* {formatDate(
+                              listItem.recommendationDeploymentDetails
+                                ?.deploymentDate
+                            )} */}
+                            {listItem.recommendationDeploymentDetails
+                              ?.deploymentDate ? (
+                              formatDate(
+                                listItem.recommendationDeploymentDetails
+                                  .deploymentDate
+                              )
+                            ) : (
+                              <span
+                                style={{
+                                  marginRight: 90,
+                                  backgroundColor: "",
+                                }}
+                              >
+                                --
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell
+                            component="th"
+                            scope="row"
+                            align="right"
+                            style={{ width: "", borderBottom: "none" }}
+                          >
+                            {listItem.recommendationDeploymentDetails
+                              ?.impactedDepartment ? (
+                              listItem.recommendationDeploymentDetails
+                                .impactedDepartment
+                            ) : (
+                              <span
+                                style={{
+                                  marginRight: 120,
+                                  backgroundColor: "",
+                                }}
+                              >
+                                --
+                              </span>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               </TableContainer>
-<Box sx={{
-                        margin: 1,
-                        backgroundColor: "white",
-                        borderBottom: "10px solid rgba(214, 242, 251, 0.30)",
-                        height: "70px",
-                        display:"flex",
-                        justifyContent:"center",
-                        alignItems:"center",
-                        gap:"10px"
-                      }}>
 
- <Button variant="outlined" sx={{color:"#281C61"}} onClick={handleRejectClick}>Reject</Button>
- <Button variant="contained" sx={{backgroundColor:"#281C61"}}>Accept</Button>
+              {userType === "AGM" && (
+                <Box
+                  sx={{
+                    margin: 1,
+                    backgroundColor: "",
+                    borderBottom: "10px solid rgba(214, 242, 251, 0.30)",
+                    height: "70px",
+                    display: "flex",
 
-</Box>
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: "10px",
+                  }}
+                >
+                  {/* <Box sx={{ backgroundColor: "", gap: "20px" }}> */}
+                  <Button
+                    variant="outlined"
+                    sx={{ color: "#281C61" }}
+                    onClick={() => handleRejectClick(row)}
+                  >
+                    Reject
+                  </Button>
 
-<RejectModal open={rejectModalOpen} onClose={handleRejectModalClose} />
+                  {row.Status === "Recommendation rejected" &&
+                  (userType === "AGM" || userType === "GM_IT_INFRA") ? (
+                    <Button
+                      variant="contained"
+                      sx={{ backgroundColor: "#281C61" }}
+                      onClick={() => handleRevertClick(row)}
+                    >
+                      Revert
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      sx={{ backgroundColor: "#281C61" }}
+                      onClick={() => handleAcceptClick(row)}
+                    >
+                      Accept
+                    </Button>
+                  )}
+                  {/* </Box> */}
+                </Box>
+              )}
 
+              {(userType === "OEM_SI" || userType === "GM_IT_INFRA") && (
+                <Box
+                  sx={{
+                    margin: 1,
+                    marginTop: 3,
+                    backgroundColor: "white",
+                    borderBottom: "10px solid rgba(214, 242, 251, 0.30)",
+                    height: "150px",
+                    // width:"200vw",
+                    display: "flex",
+                    flexDirection: "column",
 
-            
+                    // justifyContent: "center",
+                    // alignItems: "center",
+                    gap: "",
+                  }}
+                >
+                  <ViewTrail viewTrailData={viewTrailData} />
+                  <Button
+                    onClick={() => handleAcceptClick(row)}
+                    variant=""
+                    sx={{ width: "10vw", alignSelf: "center", marginBottom: 3 }}
+                  >
+                    <Typography
+                      sx={{
+                        color: "#281C61",
+                        fontSize: "16px",
+                        fontStyle: "normal",
+                        fontFamily: "Inter",
+                        textDecoration: "underline",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      VIEW DETAILS
+                    </Typography>
+                  </Button>
+                </Box>
+              )}
+
+              {userType === "APPLICATION_OWNER" &&
+                viewTrailData.trailResponse !== null && (
+                  <Box
+                    sx={{
+                      margin: 1,
+                      backgroundColor: "white",
+                      borderBottom: "10px solid rgba(214, 242, 251, 0.30)",
+                      height: "200px",
+                      // width:"200vw",
+                      display: "flex",
+                      flexDirection: "column",
+
+                      // justifyContent: "center",
+                      // alignItems: "center",
+                      gap: "",
+                    }}
+                  >
+                    <ViewTrail viewTrailData={viewTrailData} />
+                    <Button
+                      onClick={() => handleAcceptClick(row)}
+                      variant=""
+                      sx={{
+                        width: "10vw",
+                        alignSelf: "center",
+                        marginBottom: 3,
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          color: "#281C61",
+                          fontSize: "16px",
+                          fontStyle: "normal",
+                          fontFamily: "Inter",
+                          textDecoration: "underline",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        VIEW DETAILS
+                      </Typography>
+                    </Button>
+                  </Box>
+                )}
+
+              {userType === "APPLICATION_OWNER" &&
+                viewTrailData.trailResponse === null && (
+                  <Box
+                    sx={{
+                      margin: 1,
+                      backgroundColor: "",
+                      borderBottom: "10px solid rgba(214, 242, 251, 0.30)",
+                      height: "50px",
+                      display: "flex",
+
+                      justifyContent: "center",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
+                  >
+                    <>
+                      <Button
+                        variant="outlined"
+                        sx={{ color: "#281C61" }}
+                        onClick={() => handleRejectClick(row)}
+                      >
+                        Reject
+                      </Button>
+
+                      {row.Status === "Recommendation rejected" &&
+                      (userType === "AGM" || userType === "GM_IT_INFRA") ? (
+                        <Button
+                          variant="contained"
+                          sx={{ backgroundColor: "#281C61" }}
+                          onClick={() => handleRevertClick(row)}
+                        >
+                          Revert
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="contained"
+                          sx={{ backgroundColor: "#281C61" }}
+                          onClick={() => handleAcceptClick(row)}
+                        >
+                          Accept
+                        </Button>
+                      )}
+                    </>
+                  </Box>
+                )}
+
+              <RejectModal
+                open={rejectModalOpen}
+                onClose={handleRejectModalClose}
+                row={row}
+                fetchApprovedListAppOwner={fetchApprovedListAppOwner}
+                fetchDataAppOwner={fetchDataAppOwner}
+                fetchDataAgm={fetchDataAgm}
+                fetchDataPiechart={fetchDataPiechart}
+              />
+              {/* <AcceptModal open={acceptModalOpen} onClose={handleAcceptModalClose}  row={row}/> */}
+
+              <AcceptModal
+                open={acceptModalOpen}
+                onClose={handleAcceptModalClose}
+                selectedData={selectedData}
+                fetchApprovedListAppOwner={fetchApprovedListAppOwner}
+                fetchDataAppOwner={fetchDataAppOwner}
+                fetchDataAgm={fetchDataAgm}
+                fetchDataPiechart={fetchDataPiechart}
+              />
+
+              <AcceptModalAppOwner
+                open={acceptAppOwnerModal}
+                onClose={handleAcceptAppOwnerModalClose}
+                selectedData={selectedDataAppOwner}
+                fetchApprovedListAppOwner={fetchApprovedListAppOwner}
+                fetchDataAppOwner={fetchDataAppOwner}
+              />
             </Box>
           </Collapse>
         </TableCell>
-
-        
       </TableRow>
-
-    
-
-     
-
-      {/* <TableRow>
-                <TableCell style={{ paddingBottom: 0, 
-                    paddingTop: 0 }} >
-                    <Collapse in={open} timeout="auto" unmountOnExit>
-                        <Box sx={{ margin: 1 }}>
-                         
-                            <Table size="small"
-                                aria-label="purchases">
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>
-                                            Description
-                                        </TableCell>
-                                        <TableCell>
-                                            Development start date
-                                        </TableCell>
-                                        <TableCell align="right">
-                                        Development end date
-                                        </TableCell>
-                                        <TableCell align="right">
-                                            Test Completion Date
-                                        </TableCell>
-                                        <TableCell align="right">
-                                           Deployment Date
-                                        </TableCell>
-                                        <TableCell align="right">
-                                            Impacted Department
-                                        </TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {row.history.map
-                                        ((historyRow) => (
-                                        <StyledTableRow key=
-                                            {historyRow.date}>
-                                            <TableCell 
-                                                component="th"
-                                                scope="row">
-                                                {historyRow.date}
-                                            </TableCell>
-                                            <TableCell>
-                                                {historyRow.customerId}
-                                            </TableCell>
-                                            <TableCell align="right">
-                                                {historyRow.amount}
-                                            </TableCell>
-                                            <TableCell align="right">
-                                                {Math.round
-                                                (historyRow.amount 
-                                                * row.price * 100) / 100}
-                                            </TableCell>
-                                            <TableCell align="right">
-                                                {historyRow.amount}
-                                            </TableCell>
-                                            <TableCell align="right">
-                                                {historyRow.amount}
-                                            </TableCell>
-                                        </StyledTableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </Box>
-                    </Collapse>
-                </TableCell>
-            </TableRow> */}
     </React.Fragment>
   );
 }
@@ -256,65 +661,13 @@ Row.propTypes = {
     price: PropTypes.number.isRequired,
   }).isRequired,
   onRowClick: PropTypes.func.isRequired,
+  listData: PropTypes.array.isRequired,
+  openRows: PropTypes.array.isRequired,
+  fetchApprovedListAppOwner: PropTypes.func.isRequired,
+  fetchDataAppOwner: PropTypes.func.isRequired,
+  fetchDataAgm: PropTypes.func.isRequired,
+  fetchDataPiechart: PropTypes.func.isRequired,
 };
-
-const rows = [
-  createData(
-    "TATA HARRIER",
-    "BLACK",
-    "DIESEL",
-    6,
-    1400000,
-    "Green",
-    "Black",
-    "Yellow",
-    "orange"
-  ),
-  createData(
-    "MAHINDRA THAR",
-    "RED",
-    "DIESEL",
-    4,
-    1600000,
-    "Green",
-    "Black",
-    "Yellow",
-    "orange"
-  ),
-  createData(
-    "MARUTI SWIFT",
-    "WHITE",
-    "PETROL",
-    5,
-    900000,
-    "Green",
-    "Black",
-    "Yellow",
-    "orange"
-  ),
-  createData(
-    "MG HECTOR",
-    "BLACK",
-    "PETROL",
-    5,
-    1800000,
-    "Green",
-    "Black",
-    "Yellow",
-    "orange"
-  ),
-  createData(
-    "MERCEDES GLS",
-    "WHITE",
-    "DIESEL",
-    5,
-    5200000,
-    "Green",
-    "Black",
-    "Yellow",
-    "orange"
-  ),
-];
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -338,24 +691,55 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   //   },
 }));
 
-export default function CollapsibleTable() {
+export default function CollapsibleTable({
+  listData,
+  fetchApprovedListAppOwner,
+  fetchDataAppOwner,
+  fetchDataAgm,
+  fetchDataPiechart,
+}) {
   const [openRows, setOpenRows] = React.useState({});
 
-
-
-  
-
-  const handleRowClick = (referenceId) => {
+  const handleRowClick = (referenceId, statusName) => {
     setOpenRows((prevOpenRows) => ({
       ...prevOpenRows,
       [referenceId]: !prevOpenRows[referenceId],
+      [statusName]: !prevOpenRows[statusName],
     }));
   };
 
+  const formatDate2 = (dateString) => {
+    if (!dateString) {
+      return "";
+    }
+
+    const date = new Date(dateString);
+    const options = {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      // hour: "2-digit",
+      // minute: "2-digit",
+      // hour12: true,
+    };
+
+    const formattedDate = new Intl.DateTimeFormat("en-IN", options).format(
+      date
+    );
+
+    return formattedDate;
+  };
+
   return (
-    <TableContainer>
+    <TableContainer
+      style={{
+        maxHeight: "50vh",
+        overflowY: "auto",
+        backgroundColor: "white",
+      }}
+    >
       <Table aria-label="collapsible table" sx={{ border: "none" }}>
-        <TableHead>
+        <TableHead sx={{ position: "sticky !important", top: 0, zIndex: 99 }}>
           <StyledTableRow>
             <StyledTableCell>Reference Id</StyledTableCell>
             <StyledTableCell align="left">Created On</StyledTableCell>
@@ -375,11 +759,32 @@ export default function CollapsibleTable() {
           ))}
         </TableBody> */}
         <TableBody>
-          {rows.map((row) => (
+          {listData.map((list) => (
             <Row
-              key={row.ReferenceId}
-              row={{ ...row, open: openRows[row.ReferenceId] }}
-              onRowClick={handleRowClick}
+              key={list.ReferenceId}
+              row={{
+                ...createData(
+                  list.referenceId,
+                  formatDate2(list.createdAt),
+                  list.recommendationType.name,
+                  list.priority,
+                  formatDate2(list.recommendDate),
+                  list.department.name,
+                  list.component.name,
+                  list.approver.userName,
+                  list.status.statusName
+                ),
+
+                open: Boolean(openRows[list.ReferenceId]),
+              }}
+              onRowClick={() =>
+                handleRowClick(list.ReferenceId, list.status.statusName)
+              }
+              listData={listData}
+              fetchApprovedListAppOwner={fetchApprovedListAppOwner}
+              fetchDataAppOwner={fetchDataAppOwner}
+              fetchDataAgm={fetchDataAgm}
+              fetchDataPiechart={fetchDataPiechart}
             />
           ))}
         </TableBody>

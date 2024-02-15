@@ -1,0 +1,21 @@
+body {
+  /* background-color: rgb(16, 73, 230); */
+  /* background-color: linear-gradient(158deg, rgb(125, 145, 236) 0%, rgb(174, 195, 207) 100%); */
+  /* background-image: linear-gradient(to right, red , blue); */
+}
+
+/* .gradient {
+    background: rgb(75, 133, 174);
+    background: linear-gradient(
+      158deg,
+      rgb(45, 184, 211) 0%,
+      rgb(174, 195, 207) 100%
+    );
+  
+  } */
+
+  #grad1 {
+    height: 100vh;
+    background-image: linear-gradient(45deg
+    ,blue, red );
+  }

@@ -1,0 +1,42 @@
+/* .custom-timeline {
+    
+  }
+  
+  .timelinedot {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    background-color: grey; 
+  }
+  
+  .timelinedot.completed {
+    background-color: #8BB610; 
+  }
+  
+  .timelinedot::before,
+  .timelinedot::after {
+    content: '';
+    position: absolute;
+    background-color: red; 
+    width: 50%;
+    height: 2px; 
+    margin-top: 0;
+    top: 15%;
+    transform: translateY(-1px);
+  }
+  
+  .timelinedot::before {
+    left: -8px; 
+  }
+  
+  .timelinedot::after {
+    right: -8px; 
+  }
+
+  .MuiTimelineConnector-root{
+    margin-top: 0;
+  }
+  
+  
+ */
