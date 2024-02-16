@@ -1,6 +1,6 @@
 const config = {
   // baseUrl: "http://localhost:9092/",
-  baseUrl: "http://192.168.12.54:9092/",
+  baseUrl: "http://192.168.12.53:9092/",
   // baseUrl: "http://192.168.12.16:9092/",
 
   apiEndPoints: {

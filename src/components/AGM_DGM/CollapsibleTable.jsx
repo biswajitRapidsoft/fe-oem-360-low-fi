@@ -184,9 +184,9 @@ function Row(props) {
   // }, [row]);
 
   const getStatusColor = (status) => {
-    if (status === "Recommendation rejected") {
+    if (status === "Rejected" || status === "AGM/DGM rejected") {
       return "red";
-    } else if (status === "Recommendation accepted") {
+    } else if (status === "Released") {
       return "#8BB610";
     } else {
       return "orange";
