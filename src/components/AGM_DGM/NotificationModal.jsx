@@ -296,7 +296,7 @@ function NotificationModal({ isOpen, onClose, recommendations }) {
             }}
             transformOrigin={{ horizontal: "left", vertical: "top" }}
             anchorOrigin={{ horizontal: "left", vertical: "top" }}
-            sx={{ marginLeft: "62%", top: "3.5%" }}
+            sx={{ marginLeft: "61%", top: "3.5%" }}
           >
             <Box>
               <MenuItem
