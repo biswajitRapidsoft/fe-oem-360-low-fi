@@ -177,6 +177,7 @@ function Navbar({
               gap: 3,
               backgroundColor: "",
               mt: 2,
+              width: "20vw",
             }}
           >
             <Box>
@@ -231,7 +232,7 @@ function Navbar({
               </Menu>
             </Box>
 
-            <Box>
+            <Box sx={{ backgroundColor: "" }}>
               <Box sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
                 <Typography sx={{ color: "#212529" }}>{userName}</Typography>
                 <KeyboardArrowDownIcon

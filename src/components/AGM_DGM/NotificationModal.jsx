@@ -223,7 +223,7 @@ function NotificationModal({ isOpen, onClose, recommendations }) {
             }}
             transformOrigin={{ horizontal: "left", vertical: "top" }}
             anchorOrigin={{ horizontal: "left", vertical: "top" }}
-            sx={{ marginLeft: "39.5%", top: "3.5%" }}
+            sx={{ marginLeft: "34%", top: "3.5%" }}
           >
             <Box sx={{ maxHeight: 250, overflow: "auto" }}>
               {recommendations.map((recommendation) => (
