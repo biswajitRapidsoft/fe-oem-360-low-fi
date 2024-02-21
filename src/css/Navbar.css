@@ -5,10 +5,12 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color: #fff;
+    margin-bottom: 1rem;
 }
 
 .nav_container {
-    width: 80%;
+    width: 90%;
     height: 100%;
     display: flex;
     align-items: center;

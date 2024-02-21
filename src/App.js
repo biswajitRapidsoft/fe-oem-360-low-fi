@@ -1,20 +1,31 @@
-import './App.css';
-import Form from "./components/Form"
-import Aotable from "./components/Aotable"
-// import AgmDash from './components/AgmDash';
-import Navbar from './components/Navbar';
+import "./App.css";
+import Routes from "./routes/Routes";
+import { ToastContainer } from "react-toastify";
+
 function App() {
   return (
     <div className="App">
-      <Navbar/>
-      {/* <Form/> */}
-      {/* <AgmDash/> */}
-      <Aotable/>
+      <Routes />
+      {/* <PieChart /> */}
+      <ToastContainer
+        position="top-right"
+        autoClose={1800}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        limit={2}
+        theme="light"
+      />{" "}
     </div>
   );
 }
 
 export default App;
 
-
-// aotable
+// 11.1.24
+// half dash is blue
+// 21.2.24
